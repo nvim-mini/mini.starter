@@ -1,10 +1,7 @@
 --- *mini.starter* Start screen
---- *MiniStarter*
 ---
 --- MIT License Copyright (c) 2021 Evgeni Chasnovski
----
---- ==============================================================================
----
+
 --- Displayed items are fully customizable both in terms of what they do and
 --- how they look (with reasonable defaults). Item selection can be done using
 --- prefix query with instant visual feedback.
@@ -12,7 +9,7 @@
 --- Key design ideas:
 --- - All available actions are defined inside items. Each item should have the
 ---   following info:
----     - <action> - function or string for |vim.cmd| which is executed when
+---     - <action> - function or string for |vim.cmd()| which is executed when
 ---       item is chosen. Empty string result in placeholder "inactive" item.
 ---     - <name> - string which will be displayed and used for choosing.
 ---     - <section> - string representing to which section item belongs.
@@ -20,7 +17,7 @@
 ---
 --- - Configure what items are displayed by supplying an array which can be
 ---   normalized to an array of items. Read about how supplied items are
----   normalized in |MiniStarter.refresh|.
+---   normalized in |MiniStarter.refresh()|.
 ---
 --- - Modify the final look by supplying content hooks: functions which take
 ---   buffer content (see |MiniStarter.get_content()|) and identifier as input
@@ -59,17 +56,17 @@
 ---
 --- # Highlight groups ~
 ---
---- * `MiniStarterCurrent` - current item.
---- * `MiniStarterFooter` - footer units.
---- * `MiniStarterHeader` - header units.
---- * `MiniStarterInactive` - inactive item.
---- * `MiniStarterItem` - item name.
---- * `MiniStarterItemBullet` - units from |MiniStarter.gen_hook.adding_bullet|.
---- * `MiniStarterItemPrefix` - unique query for item.
---- * `MiniStarterSection` - section units.
---- * `MiniStarterQuery` - current query in active items.
+--- - `MiniStarterCurrent` - current item.
+--- - `MiniStarterFooter` - footer units.
+--- - `MiniStarterHeader` - header units.
+--- - `MiniStarterInactive` - inactive item.
+--- - `MiniStarterItem` - item name.
+--- - `MiniStarterItemBullet` - units from |MiniStarter.gen_hook.adding_bullet()|.
+--- - `MiniStarterItemPrefix` - unique query for item.
+--- - `MiniStarterSection` - section units.
+--- - `MiniStarterQuery` - current query in active items.
 ---
---- To change any highlight group, modify it directly with |:highlight|.
+--- To change any highlight group, set it directly with |nvim_set_hl()|.
 ---
 --- # Disabling ~
 ---
@@ -78,11 +75,10 @@
 --- of different scenarios and customization intentions, writing exact rules
 --- for disabling module's functionality is left to user. See
 --- |mini.nvim-disabling-recipes| for common recipes.
+---@tag MiniStarter
 
---- Example configurations
----
---- Configuration similar to 'mhinz/vim-startify': >lua
----
+--- # Similar to 'mhinz/vim-startify' ~
+--- >lua
 ---   local starter = require('mini.starter')
 ---   starter.setup({
 ---     evaluate_single = true,
@@ -100,8 +96,8 @@
 ---     },
 ---   })
 --- <
---- Configuration similar to 'glepnir/dashboard-nvim': >lua
----
+--- # Similar to 'glepnir/dashboard-nvim' ~
+--- >lua
 ---   local starter = require('mini.starter')
 ---   starter.setup({
 ---     items = {
@@ -113,9 +109,8 @@
 ---     },
 ---   })
 --- <
---- Elaborated configuration showing capabilities of custom items,
---- header/footer, and content hooks: >lua
----
+--- # Demo of capabilities ~
+--- >lua
 ---   local my_items = {
 ---     { name = 'Echo random number', action = 'lua print(math.random())', section = 'Section 1' },
 ---     function()
@@ -169,14 +164,12 @@
 --- <
 ---@tag MiniStarter-example-config
 
---- # Lifecycle of Starter buffer ~
----
 --- - Open with |MiniStarter.open()|. It includes creating buffer with
 ---   appropriate options, mappings, behavior; call to |MiniStarter.refresh()|;
 ---   issue `MiniStarterOpened` |User| event.
 --- - Wait for user to choose an item. This is done using following logic:
 ---     - Typing any character from `MiniStarter.config.query_updaters` leads
----       to updating query. Read more in |MiniStarter.add_to_query|.
+---       to updating query. Read more in |MiniStarter.add_to_query()|.
 ---     - <BS> deletes latest character from query.
 ---     - <Down>/<Up>, <C-n>/<C-p>, <M-j>/<M-k> move current item.
 ---     - <CR> executes action of current item.
@@ -220,9 +213,7 @@ MiniStarter.setup = function(config)
   H.create_default_hl()
 end
 
---- Module config
----
---- Default values:
+--- Defaults ~
 ---@eval return MiniDoc.afterlines_to_code(MiniDoc.current.eval_section)
 MiniStarter.config = {
   -- Whether to open Starter buffer on VimEnter. Not opened if Neovim was
@@ -268,13 +259,13 @@ MiniStarter.config = {
 --- Open Starter buffer
 ---
 --- - Create buffer if necessary and move into it.
---- - Set buffer options. Note that settings are done with |noautocmd| to
+--- - Set buffer options. Note that settings are done with |:noautocmd| to
 ---   achieve a massive speedup.
 --- - Set buffer mappings. Besides basic mappings (described inside "Lifecycle
 ---   of Starter buffer" of |mini.starter|), map every character from
 ---   `MiniStarter.config.query_updaters` to add itself to query with
----   |MiniStarter.add_to_query|.
---- - Populate buffer with |MiniStarter.refresh|.
+---   |MiniStarter.add_to_query()|.
+--- - Populate buffer with |MiniStarter.refresh()|.
 --- - Issue custom `MiniStarterOpened` event to allow acting upon opening
 ---   Starter buffer. Use it with
 ---   `autocmd User MiniStarterOpened <your command>`.
@@ -348,8 +339,8 @@ end
 --- - Sequentially apply hooks from `MiniStarter.config.content_hooks` to
 ---   content. All hooks are applied with `(content, buf_id)` signature. Output
 ---   of one hook serves as first argument to the next.
---- - Gather final items from content with |MiniStarter.content_to_items|.
---- - Convert content to buffer lines with |MiniStarter.content_to_lines| and
+--- - Gather final items from content with |MiniStarter.content_to_items()|.
+--- - Convert content to buffer lines with |MiniStarter.content_to_lines()| and
 ---   add them to buffer.
 --- - Add highlighting of content units.
 --- - Position cursor.
@@ -427,7 +418,7 @@ MiniStarter.sections.builtin_actions = function()
   }
 end
 
---- Section with |MiniSessions| sessions
+--- Section with |mini.sessions| sessions
 ---
 --- Sessions are taken from |MiniSessions.detected|. Notes:
 --- - If it shows "'mini.sessions' is not set up", it means that you didn't
@@ -435,7 +426,7 @@ end
 --- - If it shows "There are no detected sessions in 'mini.sessions'", it means
 ---   that there are no sessions at the current sessions directory. Either
 ---   create session or supply different directory where session files are
----   stored (see |MiniSessions.setup|).
+---   stored (see |MiniSessions.setup()|).
 --- - Local session (if detected) is always displayed first.
 ---
 ---@param n number|nil Number of returned items. Default: 5.
@@ -492,7 +483,7 @@ end
 
 --- Section with most recently used files
 ---
---- Files are taken from |vim.v.oldfiles|.
+--- Files are taken from |v:oldfiles|.
 ---
 ---@param n number|nil Number of returned items. Default: 5.
 ---@param current_dir boolean|nil Whether to return files only from current working
@@ -545,10 +536,10 @@ MiniStarter.sections.recent_files = function(n, current_dir, show_path)
 end
 
 -- stylua: ignore
---- Section with 'mini.pick' pickers
+--- Section with |mini.pick| pickers
 ---
 --- Notes:
---- - All actions require |mini.pick| module of 'mini.nvim'.
+--- - All actions require 'mini.pick' module of 'mini.nvim'.
 --- - "Command history", "Explorer", and "Visited paths" items
 ---   require |mini.extra| module of 'mini.nvim'.
 --- - "Visited paths" items requires |mini.visits| module of 'mini.nvim'.
@@ -571,8 +562,10 @@ end
 --- Section with basic Telescope pickers relevant to start screen
 ---
 --- Notes:
---- - All actions require 'nvim-telescope/telescope.nvim' plugin.
---- - "Browser" item requires 'nvim-telescope/telescope-file-browser.nvim'.
+--- - All actions require
+---   [nvim-telescope/telescope.nvim](https://github.com/nvim-telescope/telescope.nvim).
+--- - "Browser" item requires
+---   [nvim-telescope/telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim).
 ---
 ---@return __starter_section_fun
 MiniStarter.sections.telescope = function()
@@ -592,7 +585,7 @@ end
 --- Table with pre-configured content hook generators
 ---
 --- Each element is a function which returns content hook. So to use them
---- inside |MiniStarter.setup|, call them.
+--- inside |MiniStarter.setup()|, call them.
 MiniStarter.gen_hook = {}
 
 --- Hook generator for padding
@@ -711,7 +704,7 @@ end
 --- and vertically. Window width and height are taken from first window in current
 --- tabpage displaying the Starter buffer.
 ---
---- Basically, this computes left and top pads for |MiniStarter.gen_hook.padding|
+--- Basically, this computes left and top pads for |MiniStarter.gen_hook.padding()|
 --- such that output lines would appear aligned in certain way.
 ---
 ---@param horizontal string|nil One of "left", "center", "right". Default: "left".
@@ -759,8 +752,8 @@ end
 ---     - "hl" - which highlighting should be applied to content string. May be
 ---       `nil` for no highlighting.
 ---
---- See |MiniStarter.content_to_lines| for converting content to buffer lines
---- and |MiniStarter.content_to_items| - to list of parsed items.
+--- See |MiniStarter.content_to_lines()| for converting content to buffer lines
+--- and |MiniStarter.content_to_items()| - to list of parsed items.
 ---
 --- Notes:
 --- - Content units with type "item" also have `item` element with all
@@ -835,11 +828,11 @@ end
 --- Parse content (in depth-first fashion) and retrieve each item from `item`
 --- element of content units with type "item". This also:
 --- - Computes some helper information about how item will be actually
----   displayed (after |MiniStarter.content_to_lines|) and minimum number of
+---   displayed (after |MiniStarter.content_to_lines()|) and minimum number of
 ---   prefix characters needed for a particular item to be queried single.
 --- - Modifies item's `name` element taking it from corresponding `string`
 ---   element of content unit. This allows modifying item's `name` at the stage
----   of content hooks (like, for example, in |MiniStarter.gen_hook.indexing|).
+---   of content hooks (like, for example, in |MiniStarter.gen_hook.indexing()|).
 ---
 ---@param content table|nil Content "2d array". Default: content of current buffer.
 ---
